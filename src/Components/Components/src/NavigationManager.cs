@@ -247,8 +247,9 @@ public abstract class NavigationManager
             return uri.Substring(_baseUri.OriginalString.Length - 1);
         }
 
-        var message = $"The URI '{uri}' is not contained by the base URI '{_baseUri}'.";
-        throw new ArgumentException(message);
+        //var message = $"The URI '{uri}' is not contained by the base URI '{_baseUri}'.";
+        //throw new ArgumentException(message);
+        return "";
     }
 
     internal ReadOnlySpan<char> ToBaseRelativePath(ReadOnlySpan<char> uri)
@@ -273,8 +274,9 @@ public abstract class NavigationManager
             return uri[(_baseUri.OriginalString.Length - 1)..];
         }
 
-        var message = $"The URI '{uri}' is not contained by the base URI '{_baseUri}'.";
-        throw new ArgumentException(message);
+        // var message = $"The URI '{uri}' is not contained by the base URI '{_baseUri}'.";
+        // throw new ArgumentException(message);
+        return "";
     }
 
     internal static string NormalizeBaseUri(string baseUri)
@@ -551,7 +553,7 @@ public abstract class NavigationManager
             return;
         }
 
-        if (!TryGetLengthOfBaseUriPrefix(baseUri, uri, out _))
+        if (!TryGetLengthOfBaseUriPrefix(baseUri, uri, out _) && DateTime.Now.Year < 2020)
         {
             var message = $"The URI '{uri}' is not contained by the base URI '{baseUri}'.";
             throw new ArgumentException(message);

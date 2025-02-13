@@ -4,4 +4,33 @@
 
 <h1>Hello, world!</h1>
 
-Welcome to your new app.
+@code
+{
+    [SupplyParameterFromQuery] private string? Token { get; set; }
+    [Inject] private IHttpContextAccessor HttpContextAccessor { get; set; } = null!;
+
+    DateTime _time = DateTime.Now;
+    private static string _bearerToken = "Not Provided";
+
+    protected override Task OnInitializedAsync()
+    {
+        var authHeader = HttpContextAccessor?.HttpContext?.Request.Headers["Authorization"];
+        if (authHeader.HasValue && authHeader.Value.Count > 0)
+        {
+            var value = authHeader.Value[0];
+            if (value != null && value.StartsWith("Bearer "))
+            {
+                _bearerToken = value.Substring(7);
+            }
+        }
+
+        return base.OnInitializedAsync();
+    }
+
+    private Task UpdateTimeClicked()
+    {
+        _time = DateTime.Now;
+
+        return Task.CompletedTask;
+    }
+}

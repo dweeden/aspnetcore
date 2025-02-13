@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using BlazorServerApp.Data;
+using Microsoft.AspNetCore.Cors.Infrastructure;
 
 namespace BlazorServerApp;
 
@@ -21,10 +22,23 @@ public class Startup
         services.AddRazorPages();
         services.AddServerSideBlazor();
         services.AddSingleton<WeatherForecastService>();
+
+        // added by dweeden
+        services.AddHttpContextAccessor();
+        services.AddAntiforgery(o => o.SuppressXFrameOptionsHeader = true);
+        services.AddCors(options =>
+        {
+            options.AddPolicy("CorsPolicy",
+                policy =>
+                {
+                    policy.WithOrigins("http://localhost:5200").AllowAnyHeader().AllowAnyMethod().AllowCredentials();
+                });
+        });
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ICorsService corsService,
+        ICorsPolicyProvider corsPolicyProvider)
     {
         if (env.IsDevelopment())
         {
@@ -37,8 +51,30 @@ public class Startup
             app.UseHsts();
         }
 
+        //app.UsePathBase("/XYZ");
+
         app.UseHttpsRedirection();
+
+        // added by dweeden
+        app.UseAntiforgery();
+        app.UseCors("CorsPolicy");
         app.UseStaticFiles();
+        // new StaticFileOptions
+        // {
+        //     //RequestPath = "/XYZ",
+        //     ServeUnknownFileTypes = true,
+        //     OnPrepareResponse = (ctx) =>
+        //     {
+        //         var policy = corsPolicyProvider
+        //             .GetPolicyAsync(ctx.Context, "CorsPolicy")
+        //             .ConfigureAwait(false)
+        //             .GetAwaiter().GetResult();
+        //
+        //         var corsResult = corsService.EvaluatePolicy(ctx.Context, policy!);
+        //
+        //         corsService.ApplyResult(corsResult, ctx.Context.Response);
+        //     }
+        // });
 
         app.UseRouting();
 
@@ -49,3 +85,4 @@ public class Startup
         });
     }
 }
+
